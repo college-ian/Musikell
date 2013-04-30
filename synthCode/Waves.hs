@@ -13,6 +13,11 @@ data Wave = Empty
             | SawWave AmplitudeF Frequency Phase deriving (Show)
 
 sineWave :: Int -> Wave -> [Int32]
+
+-- Behavior that maintains the current Sample value
+-- Event that would fire to sample
+
+-- Pass a Timer that would when fired produce another x amount of times
 sineWave samples (SineWave amp freq phase)  =  map (round . (* fromIntegral amp)) $
                                         map sin [0.0, ((2*pi*freq)/fromIntegral samples)..]
 
