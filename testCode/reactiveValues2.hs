@@ -18,7 +18,7 @@ import Reactive.Banana.WX
 
 --wavPoints :: Behavior t [Double]
 --wavPoints = pure (map sin [0.0, ((2*pi*200)/fromIntegral 16000)..])
-wavPoints = (map sin [0.0, ((2*pi*200)/fromIntegral sampleRate)..])
+wavPoints start freq  = (map sin [start, ((2*pi*freq)/fromIntegral sampleRate)..])
 
 sampleRate :: Int
 sampleRate = 5400 
@@ -32,16 +32,19 @@ bitrate = 32
 header = WAVEHeader 1 samplesPS bitrate Nothing
 
 
-dt = 70
+dt = 500
 main = start $ do 
     f <- frame [text := "Timer Go"]
     t <- timer f [enabled := False] -- we're going to need a bigger timer :P
-    start <- button f [text := "Start"]
-    stop  <- button f [text := "Stop"] 
-    write <- button f [text := "Write"]
+    start   <- button f [text := "Start"]
+    stop    <- button f [text := "Stop"] 
+    write   <- button f [text := "Write"]
+    freqUp  <- button f [text := "Freq Up"]
+    freqDo  <- button f [text := "Freq Down"]
     
     set f [layout := margin 10 $
-            column 10 [row 5 [widget start, widget stop, widget write]]
+            column 10 [row 5 [widget start, widget stop, widget write], 
+                row 5 [widget freqUp, widget freqDo]]
         ]
   
    
@@ -51,15 +54,18 @@ main = start $ do
             eStart <- event0 start command
             eStop  <- event0 stop  command
             eWrite <- event0 write command
-            
+            eFreqU <- event0 freqUp command
             startTimer t eStart
             stopTimer  t eStop 
             
-            
+             -- a behavior that holds the number of samples we've taken so far
+           -- let bSampleNumber = accumB 0 ((sampleRate+) < eAlarm)
             --reactimate $ (\n -> putStrLn "Timer Fired") <$> eAlarm
             
             let bSampleValues :: Behavior t ([Double], [Double])
-                bSampleValues = accumB ([], wavPoints) (specialSplit' sampleRate <$ eAlarm)
+                bSampleValues = accumB ([], (wavPoints 0.0 200)) (specialSplit' sampleRate <$ eAlarm)
+           
+            
             let bFirst = (pure fst) <*> bSampleValues
             
             writeSoundFile bFirst eWrite
@@ -114,19 +120,4 @@ writeSoundFile b e = do
     --reactimate $ (\n -> putStrLn $ show n) <$> eFinal
     
     return ()
-   
-    
---Method to take behavior and when a timer sounds, split the values 
-{-sample :: Frameworks t => Timer -> Event t a -> Moment t ()
-sample t e = do
-    
-    -- timer fired split values and return
-    
-    let bSplitValue :: Behavior t ([Double], [Double])
-        bSplitValue = (splitAt sampleRate) <$> wavPoints
-    
-    eOut <- changes bSplitValue
-    return eOut
-    -- at the end we're going to return a list of values-}
-     
     
