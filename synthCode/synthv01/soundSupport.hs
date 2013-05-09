@@ -7,7 +7,7 @@ import Data.WAVE
 
 dt = 500
 generateWAVFile :: WAVE -> IO()
-generateWAVFile wav = putWAVEFile "whatever.wav" wav
+generateWAVFile wav = putWAVEFile "testFilter.wav" wav
 
 
 bitrate = 32

@@ -9,6 +9,10 @@ module SynthFilters where
  -- low pass filter will take a minimum cutoff frequency and everything below 
  -- that will be 1, and during the transition band will be interpolated,
  -- and everything above the upper limit will be 0
+ 
+ -- just so that we can have several higher order functions 
+ noFilt frequency = 1 
+ 
  hPassFilter :: Double -> Double -> Double -> Double
  hPassFilter lowCut highCut frequency
     | frequency < lowCut = 0

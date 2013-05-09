@@ -13,6 +13,7 @@ import Reactive.Banana.WX
 import DataTypes
 import SynthesiserFunctions
 import SoundSupport
+import SynthFilters
 --wavPoints :: Behavior t [Double]
 --wavPoints = pure (map sin [0.0, ((2*pi*200)/fromIntegral 16000)..])
 
@@ -72,7 +73,7 @@ main = start $ do
             --reactimate $ (\n -> putStrLn "Timer Fired") <$> eAlarm
             
             let bSampleValues :: Behavior t ([Double], [Double], WaveInfo, Amplitude)
-                bSampleValues = accumB ([], (squareWaves samplesPS (startPosition rw)  (frequency rw) [1..200]{-(controlValue rw)-}), rw, (repeat 0))
+                bSampleValues = accumB ([], (sawWave (hPassFilter 500 1000) samplesPS (startPosition rw)  (frequency rw) [1..20]{-(controlValue rw)-}), rw, (repeat 0))
                           $     (gatherSamples samplesPS <$ eAlarm) 
                          `union`(changeCV UP <$ eFreqU) 
                          `union`(changeCV DOWN <$ eFreqD)
