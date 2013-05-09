@@ -19,7 +19,12 @@ import SoundSupport
 
 
 envelope :: [StepPair]
-envelope = [(4000,1), (3000,0.4)]
+envelope = [(4000,1), (3000,0.4)]{-
+ (200,0.6),(500,0),
+ (200,0.6),(500,0),
+ (200,0.6),(500,0),
+ (200,0.6),(500,0),
+ (200,0.6),(500,0)]-}
 
 samplesPS :: Int
 samplesPS = 8000 
@@ -67,7 +72,7 @@ main = start $ do
             --reactimate $ (\n -> putStrLn "Timer Fired") <$> eAlarm
             
             let bSampleValues :: Behavior t ([Double], [Double], WaveInfo, Amplitude)
-                bSampleValues = accumB ([], (wavPoints samplesPS (startPosition rw)  (frequency rw) (controlValue rw)), rw, (repeat 0))
+                bSampleValues = accumB ([], (squareWaves samplesPS (startPosition rw)  (frequency rw) [1..200]{-(controlValue rw)-}), rw, (repeat 0))
                           $     (gatherSamples samplesPS <$ eAlarm) 
                          `union`(changeCV UP <$ eFreqU) 
                          `union`(changeCV DOWN <$ eFreqD)
