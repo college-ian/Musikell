@@ -14,6 +14,7 @@ import DataTypes
 import SynthesiserFunctions
 import SoundSupport
 import SynthFilters
+import Waves
 --wavPoints :: Behavior t [Double]
 --wavPoints = pure (map sin [0.0, ((2*pi*200)/fromIntegral 16000)..])
 
@@ -52,7 +53,7 @@ main = start $ do
   
     -- rw = runningWave
     let rw :: WaveInfo
-        rw = WaveInfo 0.0 200 0 False
+        rw = WaveInfo 0.0 (SawWave 200 1 [1,5,8] noFilt) 0 False
     let networkDescription :: forall t. Frameworks t => Moment t ()
         networkDescription = do 
             
@@ -68,12 +69,9 @@ main = start $ do
             startTimer t eStart
             stopTimer  t eStop 
             
-             -- a behavior that holds the number of samples we've taken so far
-           
-            --reactimate $ (\n -> putStrLn "Timer Fired") <$> eAlarm
             
-            let bSampleValues :: Behavior t ([Double], [Double], WaveInfo, Amplitude)
-                bSampleValues = accumB ([], (sawWave (hPassFilter 500 1000) samplesPS (startPosition rw)  (frequency rw) [1..20]{-(controlValue rw)-}), rw, (repeat 0))
+            let bSampleValues :: Behavior t SynthState
+                bSampleValues = accumB ([], generateWave samplesPS rw , rw, (repeat 0))
                           $     (gatherSamples samplesPS <$ eAlarm) 
                          `union`(changeCV UP <$ eFreqU) 
                          `union`(changeCV DOWN <$ eFreqD)
@@ -81,11 +79,9 @@ main = start $ do
                          `union`(endGenEnvelope samplesPS (1000,0) <$ eStopE)
                 bFirst = (pure $ \(x, y, z,w) -> x) <*> bSampleValues
             
+            --realTimePlay samplesPS bFirst
             writeSoundFile samplesPS bFirst eWrite
             
-            
-            --eFirst <- changes bFirst 
-            --reactimate $ (\n -> putStrLn $ show n) <$> eFirst
     network <- compile networkDescription
     actuate network
 

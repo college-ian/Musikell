@@ -5,7 +5,7 @@ import Reactive.Banana
 import Reactive.Banana.WX
 import Data.WAVE
 
-dt = 500
+dt = 1000
 generateWAVFile :: WAVE -> IO()
 generateWAVFile wav = putWAVEFile "testFilter.wav" wav
 
@@ -33,6 +33,21 @@ stopTimer  t e = do
 -- Going to need the entire list of samples that are output up till then  
 -- should be stored in a behavior and then when event write is pressed
 -- we take that list
+
+printNoBrackets [] = do
+    print '0'
+    return ()
+printNoBrackets (x:xs) = do
+    print x
+    printNoBrackets xs
+
+realTimePlay :: Frameworks  t => Int -> Behavior t [Double] -> Moment t ()
+realTimePlay samples b = do
+    let 
+        bStep1 = (pure (map doubleToSample)) <*> b
+    e <- changes bStep1
+    reactimate $ (\n -> putStrLn $ show n) <$> e
+
 writeSoundFile :: Frameworks  t => Int -> Behavior t [Double] -> Event t a -> Moment t ()
 writeSoundFile samplesPS b e = do
     let 
